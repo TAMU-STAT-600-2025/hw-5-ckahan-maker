@@ -30,7 +30,40 @@ double lasso_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, const arma::
 // Lasso coordinate-descent on standardized data with one lamdba. Returns a vector beta.
 // [[Rcpp::export]]
 arma::colvec fitLASSOstandardized_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, double lambda, const arma::colvec& beta_start, double eps = 0.001){
-  // Your function code goes here
+  // Calculate initial objective value
+  double f = lasso_c(Xtilde, Ytilde, beta_start, lambda); 
+  // Initialize value of beta
+  arma::colvec beta = beta_start;
+  // Calculate number of rows and columns in Xtilde
+  double n = Xtilde.n_rows;
+  double p = Xtilde.n_cols;
+  while (true) {
+    // Update previous objective value
+    double f_old = f;
+    // Update previous value of beta
+    arma::colvec beta_old = beta;
+    
+    arma::colvec XB = Xtilde * beta_old;
+    // Calculate residual vector
+    arma::colvec r = Ytilde - XB;
+    for(int j = 0; j < p; j++) {
+      // gradient component for coordinate j: (1/n) * X_jᵀR 
+      double XjR_scaled = arma::dot(Xtilde.col(j), r) / n;
+      // Update β_j via soft-thresholding: S(β_old[j] + (X_jᵀ r)/n, λ)
+      beta(j) = soft_c(beta_old(j) + XjR_scaled, lambda);
+      // Compute coefficient change for feature j: β_old[j] − β_new[j]
+      double delta_beta_j = beta_old(j) - beta(j);
+      // Update residuals: r ← r + X_j * (β_old[j] − β[j])
+      r += Xtilde.col(j) * delta_beta_j;
+    }
+    // Evaluate LASSO objective at the updated coefficients β
+    f = lasso_c(Xtilde, Ytilde, beta, lambda);
+    // If the objective function doesn't decrease significantly, stop 
+    if (f_old - f < eps) {
+      break;
+    }
+  }
+  return beta;
 }  
 
 // Lasso coordinate-descent on standardized data with supplied lambda_seq. 
