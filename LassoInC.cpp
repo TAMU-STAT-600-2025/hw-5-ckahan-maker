@@ -1,3 +1,5 @@
+#include <cmath> // for math functions on scalars such as std::max and std::abs
+#include <algorithm> // for std::max
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp;
@@ -5,7 +7,9 @@ using namespace Rcpp;
 // Soft-thresholding function, returns scalar
 // [[Rcpp::export]]
 double soft_c(double a, double lambda){
-  // Your function code goes here
+  double sgn_a = (a > 0) - (a < 0); // returns +1 if a > 0, -1 if a < 0, and 0 if a == 0
+  // Apply soft-thresholding: sign(a) * max(|a| - λ, 0)
+  return sgn_a * std::max(std::abs(a) - lambda, 0.0);
 }
 
 // Lasso objective function, returns scalar

@@ -2,6 +2,7 @@
 # Header for Rcpp and RcppArmadillo
 library(Rcpp)
 library(RcppArmadillo)
+library(testthat)
 
 # Source your C++ funcitons
 sourceCpp("LassoInC.cpp")
@@ -11,8 +12,11 @@ source("LassoFunctions.R")
 
 # Do at least 2 tests for soft-thresholding function below. You are checking output agreements on at least 2 separate inputs
 #################################################
-
-
+test_that("soft_c matches soft for several scalar inputs", {
+  expect_equal(soft_c(4, 1),  soft(4, 1))
+  expect_equal(soft_c(4, 5),  soft(4, 5))
+  expect_equal(soft_c(-4, 3), soft(-4, 3))
+})
 # Do at least 2 tests for lasso objective function below. You are checking output agreements on at least 2 separate inputs
 #################################################
 
@@ -31,21 +35,21 @@ source("LassoFunctions.R")
 
 # Tests on riboflavin data
 ##########################
-require(hdi) # this should install hdi package if you don't have it already; otherwise library(hdi)
-data(riboflavin) # this puts list with name riboflavin into the R environment, y - outcome, x - gene erpression
-
-# Make sure riboflavin$x is treated as matrix later in the code for faster computations
-class(riboflavin$x) <- class(riboflavin$x)[-match("AsIs", class(riboflavin$x))]
-
-# Standardize the data
-out <- standardizeXY(riboflavin$x, riboflavin$y)
-
-# This is just to create lambda_seq, can be done faster, but this is simpler
-outl <- fitLASSOstandardized_seq(out$Xtilde, out$Ytilde, n_lambda = 30)
-
-# The code below should assess your speed improvement on riboflavin data
-microbenchmark(
-  fitLASSOstandardized_seq(out$Xtilde, out$Ytilde, outl$lambda_seq),
-  fitLASSOstandardized_seq_c(out$Xtilde, out$Ytilde, outl$lambda_seq),
-  times = 10
-)
+# require(hdi) # this should install hdi package if you don't have it already; otherwise library(hdi)
+# data(riboflavin) # this puts list with name riboflavin into the R environment, y - outcome, x - gene erpression
+# 
+# # Make sure riboflavin$x is treated as matrix later in the code for faster computations
+# class(riboflavin$x) <- class(riboflavin$x)[-match("AsIs", class(riboflavin$x))]
+# 
+# # Standardize the data
+# out <- standardizeXY(riboflavin$x, riboflavin$y)
+# 
+# # This is just to create lambda_seq, can be done faster, but this is simpler
+# outl <- fitLASSOstandardized_seq(out$Xtilde, out$Ytilde, n_lambda = 30)
+# 
+# # The code below should assess your speed improvement on riboflavin data
+# microbenchmark(
+#   fitLASSOstandardized_seq(out$Xtilde, out$Ytilde, outl$lambda_seq),
+#   fitLASSOstandardized_seq_c(out$Xtilde, out$Ytilde, outl$lambda_seq),
+#   times = 10
+# )
