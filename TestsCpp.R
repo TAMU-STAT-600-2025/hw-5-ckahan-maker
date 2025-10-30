@@ -19,7 +19,36 @@ test_that("soft_c matches soft for several scalar inputs", {
 })
 # Do at least 2 tests for lasso objective function below. You are checking output agreements on at least 2 separate inputs
 #################################################
-
+test_that("lasso_c matches lasso for multiple inputs", {
+  lambda <- 2
+  
+  # Example #1:
+  set.seed(123)
+  X1 <- matrix(rnorm(500), 100, 5)
+  Y1 <- rep(0, 100)
+  beta1 <- sample(1:10, 5)
+  expect_equal(lasso(X1, Y1, beta1, lambda),
+               lasso_c(X1, Y1, beta1, lambda),
+               tolerance = 1e-8)
+  
+  # Example #2:
+  set.seed(456)
+  X2 <- matrix(rnorm(100), 50, 2)
+  Y2 <- rep(50, 50)
+  beta2 <- sample(-3:3, 2)
+  expect_equal(lasso(X2, Y2, beta2, lambda),
+               lasso_c(X2, Y2, beta2, lambda),
+               tolerance = 1e-8)
+  
+  # Example #3:
+  set.seed(789)
+  X3 <- matrix(rnorm(1000), 10, 100)
+  Y3 <- rnorm(10)
+  beta3 <- -49:50  
+  expect_equal(lasso(X3, Y3, beta3, lambda),
+               lasso_c(X3, Y3, beta3, lambda),
+               tolerance = 1e-8)
+})
 
 # Do at least 2 tests for fitLASSOstandardized function below. You are checking output agreements on at least 2 separate inputs
 #################################################

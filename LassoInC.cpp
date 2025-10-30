@@ -15,7 +15,16 @@ double soft_c(double a, double lambda){
 // Lasso objective function, returns scalar
 // [[Rcpp::export]]
 double lasso_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, const arma::colvec& beta, double lambda){
-  // Your function code goes here
+  // Number of observations
+  double n = Xtilde.n_rows;
+  // Compute residuals: Y - Xβ
+  arma::colvec residuals = Ytilde - Xtilde * beta;
+  // Compute residual sum of squares: ||Y - Xβ||²
+  double rss = arma::dot(residuals, residuals);
+  // Compute L1 penalty: sum of absolute coefficients
+  double l1 = arma::norm(beta, 1);
+  // Return LASSO objective: (1 / (2n)) * RSS + λ * ||β||₁
+  return(rss / (2.0 * n) + lambda * l1);
 }
 
 // Lasso coordinate-descent on standardized data with one lamdba. Returns a vector beta.
