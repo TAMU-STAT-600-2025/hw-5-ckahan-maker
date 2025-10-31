@@ -154,6 +154,30 @@ test_that("fitLASSOstandardized_seq matches fitLASSOstandardized_seq_c", {
 })
 # Do microbenchmark on fitLASSOstandardized_seq vs fitLASSOstandardized_seq_c
 ######################################################################
+set.seed(123)
+Xtilde_bench <- matrix(rnorm(5000), nrow = 100, ncol = 50)
+Xtilde_bench[, 26:50] <- Xtilde_bench[, 1:25] + rnorm(2500, sd = 0.05)
+Ytilde_bench <- Xtilde_bench[, 1] - 0.3 * Xtilde_bench[, 45] + 0.5 * Xtilde_bench[, 27] + rnorm(100)
+
+# Standardize
+centeredXY <- standardizeXY(Xtilde_bench, Ytilde_bench)
+cXtilde_bench <- centeredXY$Xtilde
+cYtilde_bench <- centeredXY$Ytilde
+
+# Lambda sequence
+lambda_seq_bench <- c(2, 0.5, 0.3, 0.15, 0.01)
+
+# Benchmark R vs C++ 
+bench_result <- microbenchmark(
+  R_version = fitLASSOstandardized_seq(cXtilde_bench, cYtilde_bench,
+                                       lambda_seq = lambda_seq_bench,
+                                       eps = 1e-4)$beta_mat,
+  C_version = fitLASSOstandardized_seq_c(cXtilde_bench, cYtilde_bench,
+                                         lambda_seq_bench, 1e-4),
+  times = 50
+)
+# R-version: 6460 microseconds median
+# C++-version: 144 microseconds median
 
 # Tests on riboflavin data
 ##########################
