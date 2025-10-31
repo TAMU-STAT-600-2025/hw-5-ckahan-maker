@@ -59,11 +59,14 @@ test_that("fitLASSOstandardized_c agrees with fitLASSOstandardized across random
   set.seed(101)
   Xtilde1 <- matrix(rnorm(40), nrow = 8, ncol = 5)
   Ytilde1 <-Xtilde1[, 2] + rnorm(8, sd = 10)
+  centeredXY <- standardizeXY(Xtilde1, Ytilde1)
+  cXtilde1 <- centeredXY$Xtilde
+  cYtilde1 <- centeredXY$Ytilde
   beta_start1 <- rep(1, 5)
   
   expect_equal(
-    as.vector(fitLASSOstandardized_c(Xtilde1, Ytilde1, lambda, beta_start1)),
-    fitLASSOstandardized(Xtilde1, Ytilde1, lambda, beta_start1)$beta,
+    as.vector(fitLASSOstandardized_c( cXtilde1, cYtilde1, lambda, beta_start1)),
+    fitLASSOstandardized(cXtilde1, cYtilde1, lambda, beta_start1)$beta,
     tolerance = 1e-8
   )
   
@@ -71,11 +74,14 @@ test_that("fitLASSOstandardized_c agrees with fitLASSOstandardized across random
   set.seed(202)
   Xtilde2 <- matrix(rnorm(72), nrow = 12, ncol = 6)
   Ytilde2 <- 2*Xtilde1[, 1] - 0.5*Xtilde1[, 4] + rnorm(12, sd = 5)
+  centeredXY <- standardizeXY(Xtilde2, Ytilde2)
+  cXtilde2 <- centeredXY$Xtilde
+  cYtilde2 <- centeredXY$Ytilde
   beta_start2 <- rep(0, 6)
   
   expect_equal(
-    as.vector(fitLASSOstandardized_c(Xtilde2, Ytilde2, lambda, beta_start2)),
-    fitLASSOstandardized(Xtilde2, Ytilde2, lambda, beta_start2)$beta,
+    as.vector(fitLASSOstandardized_c(cXtilde2, cYtilde2, lambda, beta_start2)),
+    fitLASSOstandardized(cXtilde2, cYtilde2, lambda, beta_start2)$beta,
     tolerance = 1e-8
   )
   
@@ -83,11 +89,14 @@ test_that("fitLASSOstandardized_c agrees with fitLASSOstandardized across random
   set.seed(303)
   Xtilde3 <- matrix(rnorm(90), nrow = 15, ncol = 6)
   Ytilde3 <- rowSums(Xtilde3) + rnorm(15, sd = 1)
+  centeredXY <- standardizeXY(Xtilde3, Ytilde3)
+  cXtilde3 <- centeredXY$Xtilde
+  cYtilde3 <- centeredXY$Ytilde
   beta_start3 <- rep(-1, 6)
   
   expect_equal(
-    as.vector(fitLASSOstandardized_c(Xtilde3, Ytilde3, lambda, beta_start3)),
-    fitLASSOstandardized(Xtilde3, Ytilde3, lambda, beta_start3)$beta,
+    as.vector(fitLASSOstandardized_c(cXtilde3, cYtilde3, lambda, beta_start3)),
+    fitLASSOstandardized(cXtilde3, cYtilde3, lambda, beta_start3)$beta,
     tolerance = 1e-8
   )
 })
