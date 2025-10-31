@@ -124,7 +124,34 @@ microbenchmark(
 
 # Do at least 2 tests for fitLASSOstandardized_seq function below. You are checking output agreements on at least 2 separate inputs
 #################################################
-
+test_that("fitLASSOstandardized_seq matches fitLASSOstandardized_seq_c", {
+  # Example #1
+  Xtilde1 <- matrix(rnorm(40), nrow = 8, ncol = 5)
+  Ytilde1 <- rnorm(8)
+  centeredXY <- standardizeXY(Xtilde1, Ytilde1)
+  cXtilde1 <- centeredXY$Xtilde
+  cYtilde1 <- centeredXY$Ytilde
+  lambda_seq1 <- c(1, 0.1, 0.01, 0.001)
+  
+  beta_mat_r1 <- fitLASSOstandardized_seq(cXtilde1, cYtilde1, lambda_seq = lambda_seq1, eps = 0.001)$beta_mat
+  beta_mat_c1 <- fitLASSOstandardized_seq_c(cXtilde1, cYtilde1, lambda_seq1, eps = 0.001)
+  
+  expect_equal(beta_mat_r1, beta_mat_c1, tolerance = 1e-8)
+  
+  # Example 2
+  Xtilde2 <- matrix(rnorm(200), nrow = 20, ncol = 10)
+  Xtilde2[, 5:10] <- Xtilde2[, 1:6] + rnorm(120, sd = 0.1)  
+  Ytilde2 <- Xtilde2[, 1] - 0.5 * Xtilde2[, 2] + rnorm(20)
+  centeredXY <- standardizeXY(Xtilde2, Ytilde2)
+  cXtilde2 <- centeredXY$Xtilde
+  cYtilde2 <- centeredXY$Ytilde
+  lambda_seq2 <- c(1, 0.5, 0.2, 0.1, 0.05)
+  
+  beta_mat_r2 <- fitLASSOstandardized_seq(cXtilde2, cYtilde2, lambda_seq = lambda_seq2, eps = 1e-4)$beta_mat
+  beta_mat_c2 <- fitLASSOstandardized_seq_c(cXtilde2, cYtilde2, lambda_seq2, 1e-4)
+  
+  expect_equal(beta_mat_r2, beta_mat_c2, tolerance = 1e-8)
+})
 # Do microbenchmark on fitLASSOstandardized_seq vs fitLASSOstandardized_seq_c
 ######################################################################
 

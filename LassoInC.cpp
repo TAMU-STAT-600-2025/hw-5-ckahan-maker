@@ -28,7 +28,7 @@ double lasso_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, const arma::
 }
 
 // Lasso coordinate-descent on standardized data with one lamdba. Returns a vector beta.
-// [[Rcpp::export]]
+// [[Rcpp::export]] 
 arma::colvec fitLASSOstandardized_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, double lambda, const arma::colvec& beta_start, double eps = 0.001){
   // Calculate initial objective value
   double f = lasso_c(Xtilde, Ytilde, beta_start, lambda); 
@@ -71,5 +71,24 @@ arma::colvec fitLASSOstandardized_c(const arma::mat& Xtilde, const arma::colvec&
 // Returns a matrix beta (p by number of lambdas in the sequence)
 // [[Rcpp::export]]
 arma::mat fitLASSOstandardized_seq_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, const arma::colvec& lambda_seq, double eps = 0.001){
-  // Your function code goes here
+  // Retrieve dimensions of Xtilde
+  int n = Xtilde.n_rows;
+  int p = Xtilde.n_cols;
+    
+  // calculate length of lambda_seq
+  int num_lambda = lambda_seq.n_elem;
+  // initialize matrix of solutions at each lambda value
+  arma::mat beta_mat(p, num_lambda);
+  // Apply fitLASSOstandardized going from largest to smallest lambda 
+  // (make sure supplied eps is carried over). 
+  // Use warm starts strategy discussed in class for setting the starting values.
+  arma::colvec beta = arma::colvec(p, arma::fill::zeros); 
+  for (int i = 0; i < num_lambda; i++){
+    double lambda = lambda_seq(i);
+    // Perform coordinate descent LASSO for the current value of λ
+    beta = fitLASSOstandardized_c(Xtilde, Ytilde, lambda, beta, eps);
+    // Store the optimal coefficients and objective value for this λ
+    beta_mat.col(i) =  beta;
+  }
+  return beta_mat;
 }
