@@ -3,6 +3,7 @@
 library(Rcpp)
 library(RcppArmadillo)
 library(testthat)
+library(microbenchmark)
 
 # Source your C++ funcitons
 sourceCpp("LassoInC.cpp")
@@ -103,6 +104,23 @@ test_that("fitLASSOstandardized_c agrees with fitLASSOstandardized across random
 
 # Do microbenchmark on fitLASSOstandardized vs fitLASSOstandardized_c
 ######################################################################
+Xtilde <- matrix(rnorm(72), nrow = 12, ncol = 6)
+Ytilde <- 2 * Xtilde[, 1] - 0.5 * Xtilde[, 4] + rnorm(12, sd = 5)
+centeredXY <- standardizeXY(Xtilde, Ytilde)
+cXtilde <- centeredXY$Xtilde
+cYtilde <- centeredXY$Ytilde
+beta_start <- rep(0, 6)
+lambda <- 1
+
+# benchmark
+microbenchmark(
+  R_version = fitLASSOstandardized(cXtilde, cYtilde, lambda, beta_start),
+  Cpp_version = fitLASSOstandardized_c(cXtilde, cYtilde, lambda, beta_start),
+  times = 100
+)
+# R version: 487 microseconds median
+# C Version: 7.60 microseconds median
+
 
 # Do at least 2 tests for fitLASSOstandardized_seq function below. You are checking output agreements on at least 2 separate inputs
 #################################################
